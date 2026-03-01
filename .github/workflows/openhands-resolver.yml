@@ -29,8 +29,8 @@ jobs:
           AUTHOR_ASSOCIATION="${{ github.event.issue.user.author_association || github.event.pull_request.user.author_association || github.event.comment.author_association || github.event.review.author_association }}"
           echo "Author association: $AUTHOR_ASSOCIATION"
           
-          # Only allow OWNER, COLLABORATOR, or MEMBER to trigger
-          if [[ "$AUTHOR_ASSOCIATION" == "OWNER" || "$AUTHOR_ASSOCIATION" == "COLLABORATOR" || "$AUTHOR_ASSOCIATION" == "MEMBER" ]]; then
+          # Allow OWNER, COLLABORATOR, MEMBER, or empty (for personal repos/trusted environments)
+          if [[ "$AUTHOR_ASSOCIATION" == "OWNER" || "$AUTHOR_ASSOCIATION" == "COLLABORATOR" || "$AUTHOR_ASSOCIATION" == "MEMBER" || -z "$AUTHOR_ASSOCIATION" ]]; then
             echo "should-run=true" >> $GITHUB_OUTPUT
           else
             echo "should-run=false" >> $GITHUB_OUTPUT

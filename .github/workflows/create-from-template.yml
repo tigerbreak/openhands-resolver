@@ -71,34 +71,6 @@ jobs:
           gh variable set LLM_MODEL --body "openai/qwen3.5-plus" --repo $NEW_REPO || true
           gh variable set TARGET_BRANCH --body "main" --repo $NEW_REPO || true
           
-          # Note: Secrets need to be set manually or use encrypted API
-          # For now, we'll create a README with instructions
-          
-          cat > /tmp/setup_instructions.md << 'EOF'
-## 🔐 Secret Setup Required
-
-To enable OpenHands in this repository, please add the following secrets:
-
-### Required Secrets:
-- `LLM_API_KEY` - Your LLM API key
-- `LLM_BASE_URL` - LLM API base URL (optional)
-- `PAT_TOKEN` - GitHub Personal Access Token
-- `PAT_USERNAME` - Your GitHub username
-
-### How to add secrets:
-1. Go to: `https://github.com/$NEW_REPO/settings/secrets/actions`
-2. Click "New repository secret"
-3. Add each secret with the values from your account
-
-### Or use GitHub CLI:
-```bash
-gh secret set LLM_API_KEY --body "your-api-key" --repo $NEW_REPO
-gh secret set LLM_BASE_URL --body "https://api.example.com" --repo $NEW_REPO
-gh secret set PAT_TOKEN --body "ghp_xxx" --repo $NEW_REPO
-gh secret set PAT_USERNAME --body "your-username" --repo $NEW_REPO
-```
-EOF
-          
           echo "📋 Setup instructions created"
 
       - name: Create initial issue
@@ -107,7 +79,7 @@ EOF
         run: |
           gh issue create \
             --title "🚀 Initialize Project" \
-            --body "This is the initial issue to set up the project.\n\n## Next Steps:\n\n1. Configure repository secrets (see README)\n2. Add your project requirements\n3. Add 'fix-me' label to trigger OpenHands" \
+            --body "This is the initial issue to set up the project.\n\n## Next Steps:\n\n1. Configure repository secrets (see README)\n2. Add your project requirements\n3. Add fix-me label to trigger OpenHands" \
             --label "fix-me" \
             --repo ${{ steps.create.outputs.repo_name }}
           
@@ -122,10 +94,8 @@ EOF
           echo "### Next Steps:"
           echo "1. ⚠️ Configure repository secrets (see repository README)"
           echo "2. 📝 Add your project requirements to the initial issue"
-          echo "3. 🤖 The 'fix-me' label is already added - OpenHands will start after secrets are configured"
+          echo "3. 🤖 The fix-me label is already added - OpenHands will start after secrets are configured"
           echo ""
           echo "### Quick Setup with GitHub CLI:"
-          echo '```bash'
           echo "gh repo clone ${{ steps.create.outputs.repo_name }}"
           echo "cd ${{ inputs.new_repo_name }}"
-          echo '```'
