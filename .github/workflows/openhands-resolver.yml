@@ -2,9 +2,9 @@ name: Resolve Issue with OpenHands
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
   pull_request:
-    types: [opened, labeled]
+    types: [labeled]
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -18,7 +18,28 @@ permissions:
   issues: write
 
 jobs:
+  check-permissions:
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+      - name: Check if user has permission to trigger
+        id: check
+        run: |
+          AUTHOR_ASSOCIATION="${{ github.event.issue.user.author_association || github.event.pull_request.user.author_association || github.event.comment.author_association || github.event.review.author_association }}"
+          echo "Author association: $AUTHOR_ASSOCIATION"
+          
+          # Only allow OWNER, COLLABORATOR, or MEMBER to trigger
+          if [[ "$AUTHOR_ASSOCIATION" == "OWNER" || "$AUTHOR_ASSOCIATION" == "COLLABORATOR" || "$AUTHOR_ASSOCIATION" == "MEMBER" ]]; then
+            echo "should-run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-run=false" >> $GITHUB_OUTPUT
+            echo "⚠️ User $AUTHOR_ASSOCIATION is not authorized to trigger OpenHands"
+          fi
+
   call-openhands-resolver:
+    needs: check-permissions
+    if: needs.check-permissions.outputs.should-run == 'true'
     uses: OpenHands/OpenHands/.github/workflows/openhands-resolver.yml@main
     with:
       macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
